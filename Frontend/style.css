@@ -1,0 +1,34 @@
+.container{
+  background-color:rgb(229,225,222);
+  float: right;
+}
+
+#title{
+  padding-top:10px;
+  font-size: 28px;
+  font-family: 'Cantata One';
+  text-align: center;
+}
+
+#description{
+  padding-top:10px;
+  font-size: 17px;
+  font-family: 'Cantata One';
+  text-align: center;
+}
+
+text{
+  font-family: Imprima;
+  font-size: 12px;
+}
+
+#tooltip{
+  position: absolute;
+  font-family: Imprima;
+  font-size: 15px;
+  width: auto;
+  display:none;
+  padding: 10px;
+  border-radius: 10px;
+  background-color:rgba(255,255,255, 0.4);
+}
