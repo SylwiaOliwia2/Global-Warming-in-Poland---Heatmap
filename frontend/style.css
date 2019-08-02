@@ -1,6 +1,8 @@
 .container{
   background-color:rgb(229,225,222);
   float: right;
+  font-family: 'Imprima';
+  font-size: 12px;
 }
 
 #title{
@@ -18,13 +20,13 @@
 }
 
 text{
-  font-family: Imprima;
+  font-family: 'Imprima';
   font-size: 12px;
 }
 
 #tooltip{
   position: absolute;
-  font-family: Imprima;
+  font-family: 'Imprima';
   font-size: 15px;
   width: auto;
   display:none;

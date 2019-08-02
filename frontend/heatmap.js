@@ -4,14 +4,13 @@
 var width = 900;
 var height = 600;
 var margin = {top: 50, right: 50, bottom: 150, left: 90};
-var colors = ["#5b2333","#c43133","#f47a42","#efd67a","#b0bf44","#689142"];
+var colors = ["#b2192d", "#d91e36", "#d7656e","#d5beb3", "#d4f4dd", "#75d9cc","#17bebb","#0e7c7b"];
 var months = ["January","February","March","April","May","June","July", "August","September","October","November","December", ""]
 
 
-d3.json("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/global-temperature.json")
-.then(function(dataset){
-  var data = dataset["monthlyVariance"];
-  var xYears = data.map((d)=>d["year"]);
+d3.csv("warsaw_weather.csv")
+.then(function(data){
+  var xYears = data.map((d)=>parseInt(d["year"]));
   var yMonths = data.map((d)=>parseInt(d["month"]) -1);
 
   //-----------------------------------------
@@ -23,7 +22,7 @@ d3.json("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/mas
 
  d3.select(".container")
     .append("h2")
-    .text("1753 - 2015: base temperature 8.66℃")
+    .text("2012-2019 average monthly temperature")
     .attr("id", "description");
 
   var svg = d3.select(".container")
@@ -55,13 +54,13 @@ d3.json("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/mas
 
   //-----------------------------------------
   // 3. HEATMAP
-  var temp = data.map((d)=>d["variance"]);
+  var temp = data.map((d)=>parseFloat(d["average_temp"]));
   var tempScale = d3.scaleLinear()
     .domain([d3.min(temp), d3.max(temp)])
     .range([ colors.length -1, 0]);
 
   var sqr_height = (height - margin.bottom - margin.top) / (d3.max(yMonths) - d3.min(yMonths) +1)
-  var sqr_width = (width - margin.left - margin.right) / (d3.max(xYears) - d3.min(xYears))
+  var sqr_width = (width - margin.left - margin.right) / (d3.max(xYears) - d3.min(xYears)+ 1)
   var sqare = svg.selectAll("rect")
     .data(data)
     .enter()
@@ -74,14 +73,14 @@ d3.json("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/mas
     .attr("class", "cell")
     .attr("data-month", (d) => d["month"] -1)
     .attr("data-year", (d) => d["year"])
-    .attr("data-temp", (d) => d["variance"])
-    .attr("fill",(d) => colors[parseInt(tempScale(d["variance"]))]);
+    .attr("data-temp", (d) => d["average_temp"])
+    .attr("fill",(d) => colors[parseInt(tempScale(d["average_temp"]))]);
 
   //-----------------------------------------
   // 4. LEGEND
   var marg = margin.bottom - margin.top
   var rect_height = 20;
-  var rect_width = rect_height * 1.5;
+  var rect_width = rect_height * 1.618;
 
   var legend = svg.selectAll("#legend")
     .data(colors)
@@ -101,9 +100,11 @@ d3.json("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/mas
   legend
     .append("text")
     .text((d, i)=>d3.format("0.2n")(tempScale.invert(i)))
-    .attr("x", (d, i)=> width -margin.left - i * rect_width  + rect_width /2)
+    .attr("x", (d, i)=> width -margin.left - i * rect_width + rect_width /2)
     .attr("y", height - marg + rect_width)
-    .attr("text-anchor", "middle");
+    .attr("text-anchor", "middle")
+    .style("font-size", "12px")
+    .style("font-family", "Imprima");
 
   //-----------------------------------------
   // 5. TOOLTIP
@@ -119,7 +120,7 @@ d3.json("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/mas
         .style("top", d3.event.pageY - margin.left + "px")
         .style("display", "inline-block")
         .attr("data-year", d["year"])
-        .html("Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d["variance"]);
+        .html("Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d["average_temp"]);
 
       d3.select(this).style("stroke-width", 2)
       .style("stroke", "black");
