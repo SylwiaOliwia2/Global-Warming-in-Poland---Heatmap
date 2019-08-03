@@ -3,20 +3,7 @@
   float: right;
   font-family: 'Imprima';
   font-size: 12px;
-}
-
-#title{
-  padding-top:10px;
-  font-size: 28px;
-  font-family: 'Cantata One';
-  text-align: center;
-}
-
-#description{
-  padding-top:10px;
-  font-size: 17px;
-  font-family: 'Cantata One';
-  text-align: center;
+  position: relative;
 }
 
 text{

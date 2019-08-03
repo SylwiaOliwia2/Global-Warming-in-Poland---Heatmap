@@ -3,7 +3,7 @@
 */
 var width = 900;
 var height = 600;
-var margin = {top: 50, right: 50, bottom: 150, left: 90};
+var margin = {top: 30, right: 50, bottom: 150, left: 90};
 var colors = ["#b2192d", "#d91e36", "#d7656e","#d5beb3", "#d4f4dd", "#75d9cc","#17bebb","#0e7c7b"];
 var months = ["January","February","March","April","May","June","July", "August","September","October","November","December", ""]
 
@@ -15,15 +15,22 @@ d3.csv("warsaw_weather.csv")
 
   //-----------------------------------------
   // 1. TITLE & SVG
-  d3.select(".container")
-    .append("h1")
-    .text("Monthly Global Land-Surface Temperature")
-    .attr("id", "title");
+  d3.selectAll(".container")
+    .append("p")
+    .text("Z-Score For Monthly Temperature")
+    .attr("id", "title")
+    .style("padding-left", margin.left + "px")
+    .style("padding-top", "10px")
+    .style("font-size", "28px")
+    .style("font-family", "Cantata One");
 
- d3.select(".container")
-    .append("h2")
-    .text("2012-2019 average monthly temperature")
-    .attr("id", "description");
+ d3.selectAll(".container")
+    .append("p")
+    .text("Calculated for 2012 - 2019")
+    .attr("id", "description")
+    .style("padding-left", margin.left + "px")
+    .style("font-size", "17px")
+    .style("font-family", "Cantata One");
 
   var svg = d3.select(".container")
     .append("svg")
@@ -44,7 +51,8 @@ d3.csv("warsaw_weather.csv")
   var xAxis = d3.axisBottom().scale(xScale)
     .tickFormat(d3.format("d"));
   var yAxis = d3.axisLeft().scale(yScale)
-    .tickFormat((d, i)=> months[i]);
+    .tickFormat((d, i)=> months[i])
+    .tickSize(0);
 
   svg.append("g").call(xAxis)
     .attr("transform", "translate(0," + xTranslate + ")").attr("id", "x-axis");
@@ -54,7 +62,45 @@ d3.csv("warsaw_weather.csv")
 
   //-----------------------------------------
   // 3. HEATMAP
-  var temp = data.map((d)=>parseFloat(d["average_temp"]));
+  // calculate mean temperature for each month over the years
+  function monthly_temp_arrays(data){
+    var temp_arrays = {};
+    months_unique.forEach(function(m) {
+      temp_arrays[m] = []
+    })
+    data.forEach(function(d) {
+      temp_arrays[ d["month"] -1].push(parseFloat(d["average_temp"]))
+    })
+    return temp_arrays
+  };
+
+  function calc_monthly_temp_mean(temp_arrays){
+    var monthly_mean_temp = {};
+    for (key in temp_arrays){
+      sum = temp_arrays[key].reduce(function(a, b) { return a + b; });
+      len = temp_arrays[key].length;
+      monthly_mean_temp[key] = sum /  len;
+    }
+    return monthly_mean_temp
+  }
+
+  function calc_monthly_temp_sd(temp_arrays){
+    var monthly_sd_temp = {};
+    for (key in temp_arrays){
+      monthly_sd_temp[key] = d3.deviation(temp_arrays[key])
+    }
+    return monthly_sd_temp
+  }
+
+  function z_standarize(value, m){
+    month = m -1
+    return (value - monthly_mean_temp[month]) / monthly_sd_temp[month]
+  }
+
+  var monthly_mean_temp = calc_monthly_temp_mean(monthly_temp_arrays(data));
+  var monthly_sd_temp = calc_monthly_temp_sd(monthly_temp_arrays(data));
+
+  var temp = data.map((d)=>parseFloat(z_standarize(d["average_temp"], d["month"])));
   var tempScale = d3.scaleLinear()
     .domain([d3.min(temp), d3.max(temp)])
     .range([ colors.length -1, 0]);
@@ -73,8 +119,8 @@ d3.csv("warsaw_weather.csv")
     .attr("class", "cell")
     .attr("data-month", (d) => d["month"] -1)
     .attr("data-year", (d) => d["year"])
-    .attr("data-temp", (d) => d["average_temp"])
-    .attr("fill",(d) => colors[parseInt(tempScale(d["average_temp"]))]);
+    .attr("data-temp", (d) => z_standarize(d["average_temp"], d["month"]))
+    .attr("fill",(d) => colors[parseInt(tempScale(z_standarize(d["average_temp"], d["month"])))]);
 
   //-----------------------------------------
   // 4. LEGEND
@@ -119,8 +165,15 @@ d3.csv("warsaw_weather.csv")
         .style("left", d3.event.pageX -margin.right + "px")
         .style("top", d3.event.pageY - margin.left + "px")
         .style("display", "inline-block")
-        .attr("data-year", d["year"])
-        .html("Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d["average_temp"]);
+        .style("position", "absolute")
+        .style("font-size", "15px")
+        .style("font-family", "Imprima")
+        .style("padding", "10px")
+        .style("height", "50px")
+        .style("border-radius", "10px")
+        .style("color", "rgb(225,225,225)")
+        .style("background-color", "rgba(0,0,0, 0.6)")
+        .html("Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d3.format(".3")(d["average_temp"]) + "<br>Deviation:" + d3.format(".3")(z_standarize(d["average_temp"], d["month"])) + "℃");
 
       d3.select(this).style("stroke-width", 2)
       .style("stroke", "black");
