@@ -8,7 +8,7 @@ var colors = ["#b2192d", "#d91e36", "#d7656e","#d5beb3", "#d4f4dd", "#75d9cc","#
 var months = ["January","February","March","April","May","June","July", "August","September","October","November","December", ""]
 
 
-d3.csv("warsaw_weather.csv")
+d3.csv("preprocessed_csv/warsaw_preprocessed.csv")
 .then(function(data){
   var xYears = data.map((d)=>parseInt(d["year"]));
   var yMonths = data.map((d)=>parseInt(d["month"]) -1);
@@ -26,7 +26,7 @@ d3.csv("warsaw_weather.csv")
 
  d3.selectAll(".container")
     .append("p")
-    .text("Calculated for 2012 - 2019")
+    .text("Calculated for " + d3.min(xYears) + " - " +  + d3.max(xYears))
     .attr("id", "description")
     .style("padding-left", margin.left + "px")
     .style("font-size", "17px")
@@ -69,7 +69,7 @@ d3.csv("warsaw_weather.csv")
       temp_arrays[m] = []
     })
     data.forEach(function(d) {
-      temp_arrays[ d["month"] -1].push(parseFloat(d["average_temp"]))
+      temp_arrays[ d["month"] -1].push(parseFloat(d["t"]))
     })
     return temp_arrays
   };
@@ -100,7 +100,7 @@ d3.csv("warsaw_weather.csv")
   var monthly_mean_temp = calc_monthly_temp_mean(monthly_temp_arrays(data));
   var monthly_sd_temp = calc_monthly_temp_sd(monthly_temp_arrays(data));
 
-  var temp = data.map((d)=>parseFloat(z_standarize(d["average_temp"], d["month"])));
+  var temp = data.map((d)=>parseFloat(z_standarize(d["t"], d["month"])));
   var tempScale = d3.scaleLinear()
     .domain([d3.min(temp), d3.max(temp)])
     .range([ colors.length -1, 0]);
@@ -119,8 +119,8 @@ d3.csv("warsaw_weather.csv")
     .attr("class", "cell")
     .attr("data-month", (d) => d["month"] -1)
     .attr("data-year", (d) => d["year"])
-    .attr("data-temp", (d) => z_standarize(d["average_temp"], d["month"]))
-    .attr("fill",(d) => colors[parseInt(tempScale(z_standarize(d["average_temp"], d["month"])))]);
+    .attr("data-temp", (d) => z_standarize(d["t"], d["month"]))
+    .attr("fill",(d) => colors[parseInt(tempScale(z_standarize(d["t"], d["month"])))]);
 
   //-----------------------------------------
   // 4. LEGEND
@@ -173,7 +173,7 @@ d3.csv("warsaw_weather.csv")
         .style("border-radius", "10px")
         .style("color", "rgb(225,225,225)")
         .style("background-color", "rgba(0,0,0, 0.6)")
-        .html("Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d3.format(".3")(d["average_temp"]) + "<br>Deviation:" + d3.format(".3")(z_standarize(d["average_temp"], d["month"])) + "℃");
+        .html("Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d3.format(".3")(d["t"]) + "<br>Deviation:" + d3.format(".3")(z_standarize(d["t"], d["month"])) + "℃");
 
       d3.select(this).style("stroke-width", 2)
       .style("stroke", "black");
