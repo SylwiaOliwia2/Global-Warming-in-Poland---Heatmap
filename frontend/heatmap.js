@@ -191,32 +191,20 @@ d3.csv("preprocessed_csv/stockholm_mean.csv")
 
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////
 // update on dropdownmenu change
 dropdown.on("change",function(){
     let selected = d3.selectAll("#d3-dropdown").node().value;
-    d3.csv(selected)
-    .then(function(data){
+    d3.selectAll("svg").remove()
+    d3.csv(selected).then(function(data){
       var xYears = data.map((d)=>parseInt(d["year"]));
       var yMonths = data.map((d)=>parseInt(d["month"]) -1);
 
       //-----------------------------------------
       // 1. TITLE & SVG
-      d3.selectAll(".container")
-        .append("p")
-        .text("Z-Score For Monthly Temperature")
-        .attr("id", "title")
-        .style("padding-left", margin.left + "px")
-        .style("padding-top", "10px")
-        .style("font-size", "28px")
-        .style("font-family", "Cantata One");
 
-     d3.selectAll(".container")
-        .append("p")
-        .text("Calculated for " + d3.min(xYears) + " - " +  + d3.max(xYears))
-        .attr("id", "description")
-        .style("padding-left", margin.left + "px")
-        .style("font-size", "17px")
-        .style("font-family", "Cantata One");
+     d3.selectAll("#description")
+        .text("Calculated for " + d3.min(xYears) + " - " +  + d3.max(xYears));
 
       var svg = d3.select(".container")
         .append("svg")
