@@ -1,8 +1,12 @@
 import pandas as pd
+import numpy as np
 import os
 import re
 
+#perc_95 = lambda x: np.percentile(x, 95)
+
 for file in os.listdir("raw_csv"):
+    metric = 'mean'
     print("File: ", file)
     # preprocessing
     raw_file = pd.read_csv(os.path.join("raw_csv", file), index_col = False, header=6, error_bad_lines=False, sep=";")
@@ -13,5 +17,5 @@ for file in os.listdir("raw_csv"):
     raw_file = raw_file.loc[:, final_columns]
 
     #pivot_table
-    pv = raw_file.pivot_table(index=["year", "month"], values="t", aggfunc="mean")
-    pv.to_csv(os.path.join("..","frontend","preprocessed_csv",re.sub("raw", "preprocessed", file)))
+    pv = raw_file.pivot_table(index=["year", "month"], values="t", aggfunc=metric)
+    pv.to_csv(os.path.join("..","frontend","preprocessed_csv",re.sub("raw", metric, file)))
