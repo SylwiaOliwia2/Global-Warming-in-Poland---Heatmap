@@ -11,9 +11,9 @@ var legend_marg = margin.bottom - margin.top;
 var legend_rect_height = 20;
 var legend_rect_width = legend_rect_height * 1.618;
 
-var xScale = d3.scaleLinear().range([margin.left, width - margin.right]);
+var xScale = d3.scaleBand().range([margin.left, width - margin.right]);
 var yScale = d3.scaleBand().range([margin.top, height -margin.bottom]);
-var xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.format("d"));
+var xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.format("d")).tickSize(0);
 var yAxis = d3.axisLeft().scale(yScale).tickFormat((d, i)=> months[i]).tickSize(0);
 var tempScale = d3.scaleLinear().range([ colors.length -1, 0]);
 
@@ -30,6 +30,7 @@ var legend = svg.selectAll("#legend")
   .enter()
   .append("g")
   .attr("id", "legend");
+
 legend
   .append("rect")
   .attr("fill", (d, i)=>d)
@@ -43,7 +44,9 @@ var legend_text =   legend.append("text")
     //.text((d, i)=>d3.format("0.2n")(tempScale.invert(i)))
     .attr("x", (d, i)=> width -margin.left - i * legend_rect_width + legend_rect_width /2)
     .attr("y", height - legend_marg + legend_rect_width)
-    .attr("text-anchor", "middle")
+    .attr("text-anchor", "middle");
+
+
 ///////////////////////////////////////////////////////////////////////////////////
 // functions
 function update_paragraph_text(id, text = "Z-Score For Monthly Temperature", padding_left=margin.left){
@@ -119,8 +122,10 @@ function update_svg(data){
 
   //-----------------------------------------
   // 2. SCALE & AXIS
-  let months_unique = get_unique_month_numbers(yMonths);
-  xScale.domain([d3.min(xYears), d3.max(xYears) +1]);
+  let months_unique = get_unique_month_numbers(yMonths)
+  let years_unique = get_unique_month_numbers(xYears);
+  console.log(years_unique)
+  xScale.domain(years_unique);
   yScale.domain(months_unique);
   call_x_y_axis();
 
@@ -135,16 +140,16 @@ function update_svg(data){
 
   var sqr_height = (height - margin.bottom - margin.top) / (d3.max(yMonths) - d3.min(yMonths) +1)
   var sqr_width = (width - margin.left - margin.right) / (d3.max(xYears) - d3.min(xYears)+ 1)
-  var sqare = svg.selectAll("rect")
+  var sqare = svg.selectAll(".cell")
     .data(data)
     .enter()
-    .append("rect");
+    .append("rect")
+    .attr("class", "cell");
 
   sqare.attr("x", (d)=>xScale(d["year"]))
     .attr("y", (d) => yScale(d["month"]- 1))
     .attr("width", sqr_width)
     .attr("height", sqr_height)
-    .attr("class", "cell")
     .attr("data-month", (d) => d["month"] -1)
     .attr("data-year", (d) => d["year"])
     .attr("data-temp", (d) => z_standarize(d["t"], d["month"], monthly_mean_temp, monthly_sd_temp))
