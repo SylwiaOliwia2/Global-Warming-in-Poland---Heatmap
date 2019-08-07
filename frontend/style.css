@@ -1,14 +1,23 @@
 .container{
-  background-color:rgb(229,225,222);
-  float: right;
   font-family: 'Imprima';
   font-size: 12px;
   position: relative;
 }
 
-text{
-  font-family: 'Imprima';
+#title{
+  padding-top:10px;
+  font-size:28px;
+  font-family:'Cantata One';
+}
+
+#description{
+  font-size:17px;
+  font-family:'Cantata One';
+}
+
+#legend{
   font-size: 12px;
+  font-family: "Imprima";
 }
 
 #tooltip{
@@ -19,11 +28,17 @@ text{
   display:none;
   padding: 10px;
   border-radius: 10px;
-  background-color:rgba(255,255,255, 0.4);
+  color:white;
+  background-color: rgba(0,0,0, 0.6);
 }
 
 #d3-dropdown{
   position: absolute;
   top: 90px;
   left: 750px;
+}
+
+text{
+  font-family: 'Imprima';
+  font-size: 12px;
 }
