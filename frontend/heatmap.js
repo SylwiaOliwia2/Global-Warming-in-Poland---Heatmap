@@ -10,6 +10,7 @@ var xTranslate = height -margin.bottom;
 var legend_marg = margin.bottom - margin.top;
 var legend_rect_height = 20;
 var legend_rect_width = legend_rect_height * 1.618;
+var sqr_padding = 1;
 
 var xScale = d3.scaleBand().range([margin.left, width - margin.right]);
 var yScale = d3.scaleBand().range([margin.top, height -margin.bottom]);
@@ -124,7 +125,6 @@ function update_svg(data){
   // 2. SCALE & AXIS
   let months_unique = get_unique_month_numbers(yMonths)
   let years_unique = get_unique_month_numbers(xYears);
-  console.log(years_unique)
   xScale.domain(years_unique);
   yScale.domain(months_unique);
   call_x_y_axis();
@@ -138,18 +138,19 @@ function update_svg(data){
   var temp = data.map((d)=>parseFloat(z_standarize(d["t"], d["month"],monthly_mean_temp, monthly_sd_temp)));
   tempScale.domain([d3.min(temp), d3.max(temp)]);
 
-  var sqr_height = (height - margin.bottom - margin.top) / (d3.max(yMonths) - d3.min(yMonths) +1)
-  var sqr_width = (width - margin.left - margin.right) / (d3.max(xYears) - d3.min(xYears)+ 1)
+  var sqr_height = (height - margin.bottom - margin.top) / (d3.max(yMonths) - d3.min(yMonths) +1) - 2* sqr_padding
+  var sqr_width = (width - margin.left - margin.right) / (d3.max(xYears) - d3.min(xYears)+ 1) - 2* sqr_padding
   var sqare = svg.selectAll(".cell")
     .data(data)
     .enter()
     .append("rect")
     .attr("class", "cell");
 
-  sqare.attr("x", (d)=>xScale(d["year"]))
+  sqare.attr("x", (d)=>xScale(d["year"]) + sqr_padding * 2)
     .attr("y", (d) => yScale(d["month"]- 1))
     .attr("width", sqr_width)
     .attr("height", sqr_height)
+    .attr("rx", 4)
     .attr("data-month", (d) => d["month"] -1)
     .attr("data-year", (d) => d["year"])
     .attr("data-temp", (d) => z_standarize(d["t"], d["month"], monthly_mean_temp, monthly_sd_temp))
@@ -165,7 +166,7 @@ function update_svg(data){
     .on("mouseover", function(d){
       html_text = "Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d3.format(".3")(d["t"]) + "<br>Deviation:" + d3.format(".3")(z_standarize(d["t"], d["month"], monthly_mean_temp, monthly_sd_temp)) + "℃"
       display_tooltip(html_text)
-      d3.select(this).style("stroke-width", 2).style("stroke", "black");
+      d3.select(this).style("stroke-width", sqr_padding * 4).style("stroke", "#282828");
     })
     .on("mouseout", function(d){
       hide_tooltip(d)
