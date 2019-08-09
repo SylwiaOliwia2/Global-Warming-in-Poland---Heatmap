@@ -111,6 +111,16 @@ function call_x_y_axis(){
   d3.selectAll("#y-axis").call(yAxis);
 }
 
+function return_divided_by(array, div=10){
+  var ret = [];
+  for ( n =0; n < array.length; n++){
+    if (array[n] % div == 0){
+      ret.push(array[n])
+    }
+  }
+  return ret
+}
+
 //main function to visualize
 function update_svg(data){
   var xYears = data.map((d)=>parseInt(d["year"]));
@@ -127,6 +137,10 @@ function update_svg(data){
   let years_unique = get_unique_month_numbers(xYears);
   xScale.domain(years_unique);
   yScale.domain(months_unique);
+  // display oinly every tenth year for better visibility
+  years_on_x_axis = return_divided_by(years_unique, 10);
+  years_on_x_axis.push("2019")
+  xAxis.tickValues(years_on_x_axis)
   call_x_y_axis();
 
   //-----------------------------------------
@@ -177,7 +191,7 @@ function update_svg(data){
 
 ///////////////////////////////////////////////////////////////////////////////////
 // display chart
-d3.csv("preprocessed_csv/stockholm_mean.csv")
+d3.csv("preprocessed_csv/LESKO_temp_mean.csv")
 .then(function(data){update_svg(data)});
 
 dropdown.on("change",function(){
