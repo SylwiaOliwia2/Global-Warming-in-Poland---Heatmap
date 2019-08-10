@@ -110,7 +110,7 @@ function z_standarize(temp, m, monthly_mean_temp, monthly_sd_temp){
 function display_tooltip(html_text){
   tooltip
     .style("left", d3.event.pageX -margin.right + "px")
-    .style("top", d3.event.pageY - margin.left + "px")
+    .style("top", d3.event.pageY - margin.left* 1.618 + "px")
     .style("display", "inline-block")
     .html(html_text);
 }
@@ -135,6 +135,9 @@ function return_divided_by(array, div=10){
       ret.push(array[n])
     }
   }
+  if ((array).includes(2019)){
+    ret.push("2019")
+  }
   return ret
 }
 
@@ -155,8 +158,7 @@ function update_svg(data){
   xScale.domain(years_unique);
   yScale.domain(months_unique);
   // display oinly every tenth year for better visibility
-  years_on_x_axis = return_divided_by(years_unique, 10);
-  years_on_x_axis.push("2019")
+  var years_on_x_axis = return_divided_by(years_unique, 10);
   xAxis.tickValues(years_on_x_axis)
   call_x_y_axis();
 
@@ -186,12 +188,13 @@ function update_svg(data){
       var get_z_value = z_standarize(d["t"], d["month"],monthly_mean_temp, monthly_sd_temp);
       return return_color(get_z_value);
   });
-
   //-----------------------------------------
   // 4. TOOLTIP
   d3.selectAll(".cell")
     .on("mouseover", function(d){
-      html_text = "Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d3.format(".3")(d["t"]) + "<br>Deviation:" + d3.format(".3")(z_standarize(d["t"], d["month"], monthly_mean_temp, monthly_sd_temp)) + "℃"
+      html_text = "<b>Date:</b> " + d["year"] + ", " + months[d["month"] - 1] + "<br><b>Temp:</b> " + d3.format(".3")(d["t"])+
+                "℃<br><b>Monthly mean</b>: " + d3.format(".2")(monthly_mean_temp[d["month"] -1]) +
+                "℃<br><b>Z-score:</b>" + d3.format(".2")(z_standarize(d["t"], d["month"], monthly_mean_temp, monthly_sd_temp))
       display_tooltip(html_text)
       d3.select(this).style("stroke-width", sqr_padding * 4).style("stroke", "#282828");
     })
