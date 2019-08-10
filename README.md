@@ -7,7 +7,7 @@ The data comes from [IMGW](https://dane.imgw.pl/data/dane_pomiarowo_obserwacyjne
 
 To gain the same reference for each month, the data is represented as **Z-score** (number of standard deviations from the mean). In this case mean was calculated separately for each month over the years. 
 
-Ex. as shown below, the temperature in December 1971 was 1.1°C. The mean temperature for December (1966-2019) was -1°C. The temperature in observed month was 0.97 standard deviations from the December mean.
+Ex. as shown below, the average temperature in December 1971 was 1.1°C. The mean temperature for December (1966-2019) was -1°C. The temperature in observed month was 0.97 standard deviations from the December mean.
 
 ![tooltip](https://github.com/SylwiaOliwia2/Global-Warming-in-Poland---Heatmap/blob/master/Tooltip.png)
 
