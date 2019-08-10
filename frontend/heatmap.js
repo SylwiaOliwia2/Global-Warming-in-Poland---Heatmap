@@ -4,19 +4,22 @@
 var width = 900;
 var height = 600;
 var margin = {top: 30, right: 50, bottom: 150, left: 90};
-var colors = ["#b2192d", "#d91e36", "#d7656e","#d5beb3", "#d4f4dd", "#75d9cc","#17bebb","#0e7c7b"];
 var months = ["January","February","March","April","May","June","July", "August","September","October","November","December", ""]
 var xTranslate = height -margin.bottom;
 var legend_marg = margin.bottom - margin.top;
 var legend_rect_height = 20;
 var legend_rect_width = legend_rect_height * 1.618;
 var sqr_padding = 1;
+var minScale = -2;
+var maxScale = 2;
 
 var xScale = d3.scaleBand().range([margin.left, width - margin.right]);
 var yScale = d3.scaleBand().range([margin.top, height -margin.bottom]);
 var xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.format("d")).tickSize(0);
 var yAxis = d3.axisLeft().scale(yScale).tickFormat((d, i)=> months[i]).tickSize(0);
-var tempScale = d3.scaleLinear().range([ colors.length -1, 0]);
+var colorscale = d3.scaleLinear().domain([minScale, 0, maxScale]).range(['#0e7c7b', '#ddd', '#b2192d']);
+var val = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
+var colors = [colorscale(-2), colorscale(-1.75), colorscale(-1.25), colorscale(-0.75), colorscale(-0.25), colorscale(0.25), colorscale(0.75), colorscale(1.25), colorscale(1.75), colorscale(2) ];
 
 var dropdown = d3.selectAll("#d3-dropdown");
 var tooltip = d3.selectAll("body").append("div").attr("id", "tooltip");
@@ -27,7 +30,7 @@ svg.append("g").attr("id", "x-axis").attr("transform", "translate(0," + xTransla
 svg.append("g").attr("id", "y-axis").attr("transform", "translate("+ margin.left+ ",0)");
 
 var legend = svg.selectAll("#legend")
-  .data(colors)
+  .data(colors.slice().reverse())
   .enter()
   .append("g")
   .attr("id", "legend");
@@ -42,11 +45,12 @@ legend
   .attr("height", legend_rect_height);
 
 var legend_text =   legend.append("text")
-    //.text((d, i)=>d3.format("0.2n")(tempScale.invert(i)))
-    .attr("x", (d, i)=> width -margin.left - i * legend_rect_width + legend_rect_width /2)
+    .text(function(d, i){
+        return val.slice().reverse()[i];
+    })
+    .attr("x", (d, i)=> width -margin.left - i * legend_rect_width )
     .attr("y", height - legend_marg + legend_rect_width)
     .attr("text-anchor", "middle");
-
 
 ///////////////////////////////////////////////////////////////////////////////////
 // functions
@@ -54,6 +58,19 @@ function update_paragraph_text(id, text = "Z-Score For Monthly Temperature", pad
   d3.selectAll(id)
     .text(text)
     .style("padding-left", padding_left + "px");
+}
+
+function return_color(z_value){
+  if (z_value <= val[0]){return colors[0]}
+  else if (z_value <= val[1]){return colors[1]}
+  else if (z_value <= val[2]){return colors[2]}
+  else if (z_value <= val[3]){return colors[3]}
+  else if (z_value <= val[4]){return colors[4]}
+  else if (z_value <= val[5]){return colors[5]}
+  else if (z_value <= val[6]){return colors[6]}
+  else if (z_value <= val[7]){return colors[7]}
+  else if (z_value <= val[8]){return colors[8]}
+  else {return colors[9]};
 }
 
 function monthly_temp_arrays(data, months_unique){
@@ -149,9 +166,6 @@ function update_svg(data){
   var monthly_mean_temp = calc_monthly_temp_mean(monthly_temp_arrays(data, months_unique));
   var monthly_sd_temp = calc_monthly_temp_sd(monthly_temp_arrays(data, months_unique));
 
-  var temp = data.map((d)=>parseFloat(z_standarize(d["t"], d["month"],monthly_mean_temp, monthly_sd_temp)));
-  tempScale.domain([d3.min(temp), d3.max(temp)]);
-
   var sqr_height = (height - margin.bottom - margin.top) / (d3.max(yMonths) - d3.min(yMonths) +1) - 2* sqr_padding
   var sqr_width = (width - margin.left - margin.right) / (d3.max(xYears) - d3.min(xYears)+ 1) - 2* sqr_padding
   var sqare = svg.selectAll(".cell")
@@ -168,14 +182,13 @@ function update_svg(data){
     .attr("data-month", (d) => d["month"] -1)
     .attr("data-year", (d) => d["year"])
     .attr("data-temp", (d) => z_standarize(d["t"], d["month"], monthly_mean_temp, monthly_sd_temp))
-    .attr("fill",(d) => colors[parseInt(tempScale(z_standarize(d["t"], d["month"],
-     monthly_mean_temp, monthly_sd_temp)))]);
+    .attr("fill",(d) => {
+      var get_z_value = z_standarize(d["t"], d["month"],monthly_mean_temp, monthly_sd_temp);
+      return return_color(get_z_value);
+  });
 
   //-----------------------------------------
-  // 4. LEGEND
-  legend_text.text((d, i)=>d3.format("0.2n")(tempScale.invert(i)));
-  //-----------------------------------------
-  // 5. TOOLTIP
+  // 4. TOOLTIP
   d3.selectAll(".cell")
     .on("mouseover", function(d){
       html_text = "Date: " + d["year"] + ", " + months[d["month"] - 1] + "<br>Temp: " + d3.format(".3")(d["t"]) + "<br>Deviation:" + d3.format(".3")(z_standarize(d["t"], d["month"], monthly_mean_temp, monthly_sd_temp)) + "℃"
