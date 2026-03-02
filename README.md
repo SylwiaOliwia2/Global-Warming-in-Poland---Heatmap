@@ -3,7 +3,7 @@ The D3 visualization shows temperature changes in selected polish cities over th
 
 ![screenshot](Screenshot_vis.png)
 
-The data comes from [IMGW](https://dane.imgw.pl/data/dane_pomiarowo_obserwacyjne/dane_meteorologiczne/miesieczne/synop/) public dataset. Click [here](https://sylwia.hs3.linux.pl/my_files/temp_heatmap/frontend/index.html) to see the visualization in action. 
+The data comes from [IMGW](https://dane.imgw.pl/data/dane_pomiarowo_obserwacyjne/dane_meteorologiczne/miesieczne/synop/) public dataset.
 
 To gain the same reference for each month, the data is represented as **Z-score** (number of standard deviations from the mean). In this case mean was calculated separately for each month over the years. 
 
